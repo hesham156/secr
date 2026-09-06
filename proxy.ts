@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const isDev = process.env.NODE_ENV !== "production";
+const isDev = process.env.NODE_ENV === "development";
 
 const protectedPrefixes = [
   "/dashboard",

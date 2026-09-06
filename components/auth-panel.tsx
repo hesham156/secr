@@ -87,7 +87,12 @@ export function AuthPanel({ title, description, icon, mode, nextPath = "/dashboa
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{description}</p>
         </div>
       </div>
-      <form className="space-y-4" onSubmit={submit}>
+      <form
+        action={mode === "login" ? "/api/auth/callback/credentials" : "/api/register"}
+        className="space-y-4"
+        method="post"
+        onSubmit={submit}
+      >
         <label className="block text-sm font-medium">
           Email
           <input
