@@ -75,7 +75,7 @@ The current tests cover encryption round-trip, tamper failure for IV/key changes
 ## Production Checklist
 
 - Use HTTPS only; localhost HTTP is acceptable for development.
-- Do not set `NODE_ENV` to custom values on Railway or any host. Leave it unset or set it exactly to `production`; values like `Production`, `prod`, or `staging` can break Next.js and React build/runtime assumptions.
+- Do not set `NODE_ENV` to custom values on Railway or any host. Leave it unset or set it exactly to `production`; values like `Production`, `prod`, or `staging` can break Next.js and React build/runtime assumptions. The `npm run build` script forces `NODE_ENV=production` defensively, but the hosting environment should still be corrected.
 - Set strong `AUTH_SECRET` and `RATE_LIMIT_SECRET`.
 - Use managed PostgreSQL encryption at rest.
 - Restrict the database user to least privilege.
