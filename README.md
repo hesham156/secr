@@ -30,6 +30,7 @@ Key decisions:
 
 - App login password is separate from master password.
 - Master password is not stored, logged, sent to the server, placed in cookies, or placed in `localStorage`.
+- Auth.js credentials login uses JWT session strategy because Auth.js v5 requires it, but the session token is kept in HttpOnly cookies and is not exposed through `localStorage`.
 - Vault key is generated locally and encrypted by a key derived from the master password.
 - Vault item fields are stored as AES-GCM ciphertext envelopes.
 - Search, password health analysis, reused-password detection, duplicate detection, and security score are local after unlock.

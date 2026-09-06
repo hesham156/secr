@@ -10,9 +10,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   trustHost: true,
   session: {
-    strategy: "database",
+    strategy: "jwt",
     maxAge: 60 * 60 * 8,
     updateAge: 60 * 10
+  },
+  callbacks: {
+    jwt({ token, user }) {
+      if (user?.id) token.sub = user.id;
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user && token.sub) session.user.id = token.sub;
+      return session;
+    }
   },
   pages: {
     signIn: "/login"

@@ -9,7 +9,7 @@ Sensitive vault data is encrypted client-side before it crosses the network. Thi
 ## Layers
 
 - UI: React Server Components for non-sensitive shells and Client Components for unlock, encryption, decrypted vault views, generator, security center, backup, and clipboard flows.
-- Authentication: Auth.js credentials provider with Prisma sessions, HttpOnly cookies, CSRF protection from Auth.js, bcrypt password hashes, optional TOTP, recovery codes, and future WebAuthn/passkey tables.
+- Authentication: Auth.js credentials provider with HttpOnly cookie sessions, CSRF protection from Auth.js, bcrypt password hashes, optional TOTP, recovery codes, and future WebAuthn/passkey tables. Credentials auth uses Auth.js JWT session strategy, but the JWT is never stored in `localStorage`.
 - Encryption: Web Crypto AES-256-GCM for vault fields. Argon2id derives a key encryption key from the master password and per-user salt. The master password never leaves the browser.
 - Data: PostgreSQL through Prisma. Vault items contain ciphertext envelopes rather than plaintext fields.
 - Validation: Zod schemas at server boundaries and client form boundaries.
@@ -30,7 +30,7 @@ Sensitive vault data is encrypted client-side before it crosses the network. Thi
 ## Trust Boundaries
 
 - Browser memory can temporarily contain decrypted data after unlock.
-- Server stores only authentication secrets, session records, encrypted vault blobs, safe hints, and audit metadata.
+- Server stores only authentication secrets, optional session-related records, encrypted vault blobs, safe hints, and audit metadata.
 - Database compromise should not expose vault contents without the master password or recovery key.
 - XSS is treated as a critical risk because malicious browser JavaScript can read decrypted data while the vault is unlocked.
 
