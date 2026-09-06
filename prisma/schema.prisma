@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuditEventType {
+  LOGIN
+  FAILED_LOGIN
+  LOGOUT
+  REGISTER
+  VAULT_CREATED
+  VAULT_UNLOCKED
+  PASSWORD_ADDED
+  PASSWORD_UPDATED
+  PASSWORD_DELETED
+  TWO_FACTOR_ENABLED
+  TWO_FACTOR_DISABLED
+  RECOVERY_CODE_USED
+  BACKUP_EXPORTED
+  BACKUP_IMPORTED
+}
+
+model User {
+  id                   String                 @id @default(cuid())
+  email                String                 @unique
+  name                 String?
+  passwordHash         String
+  emailVerified        DateTime?
+  image                String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  accounts             Account[]
+  sessions             Session[]
+  authenticators       Authenticator[]
+  vaults               Vault[]
+  securitySettings     UserSecuritySettings?
+  recoveryCodes        RecoveryCode[]
+  auditLogs            AuditLog[]
+  failedLoginAttempts  FailedLoginAttempt[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+model Vault {
+  id                         String      @id @default(cuid())
+  userId                     String
+  name                       String      @default("Personal Vault")
+  kdf                        String      @default("argon2id")
+  kdfSalt                    String
+  kdfMemory                  Int
+  kdfIterations              Int
+  kdfParallelism             Int
+  encryptedVaultKey          String?
+  encryptedRecoveryKeyBundle String?
+  createdAt                  DateTime    @default(now())
+  updatedAt                  DateTime    @updatedAt
+  user                       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items                      VaultItem[]
+  categories                 Category[]
+  tags                       Tag[]
+
+  @@index([userId])
+}
+
+model VaultItem {
+  id             String    @id @default(cuid())
+  vaultId        String
+  favorite       Boolean   @default(false)
+  itemType       String    @default("credential")
+  domainHint     String?
+  categoryId     String?
+  titleCipher    String
+  websiteCipher  String?
+  urlCipher      String?
+  usernameCipher String?
+  passwordCipher String?
+  notesCipher    String?
+  extraCipher    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  vault          Vault     @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  category       Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags           ItemTag[]
+
+  @@index([vaultId])
+  @@index([domainHint])
+  @@index([deletedAt])
+}
+
+model Category {
+  id        String      @id @default(cuid())
+  vaultId   String
+  name      String
+  color     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  vault     Vault       @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  items     VaultItem[]
+
+  @@unique([vaultId, name])
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  vaultId   String
+  name      String
+  createdAt DateTime  @default(now())
+  vault     Vault     @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  items     ItemTag[]
+
+  @@unique([vaultId, name])
+}
+
+model ItemTag {
+  itemId String
+  tagId  String
+  item   VaultItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag    Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+}
+
+model UserSecuritySettings {
+  userId                 String   @id
+  twoFactorEnabled       Boolean  @default(false)
+  totpSecretCipher       String?
+  autoLockMinutes        Int      @default(5)
+  requireMasterOnResume  Boolean  @default(true)
+  passkeysEnabled        Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RecoveryCode {
+  id        String    @id @default(cuid())
+  userId    String
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String         @id @default(cuid())
+  userId    String?
+  event     AuditEventType
+  ipHash    String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime       @default(now())
+  user      User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([event])
+}
+
+model FailedLoginAttempt {
+  id        String   @id @default(cuid())
+  userId    String?
+  emailHash String
+  ipHash    String
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([emailHash, createdAt])
+  @@index([ipHash, createdAt])
+}
