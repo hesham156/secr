@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/build.mjs",
-    "start": "next start",
+    "start": "prisma migrate deploy && next start",
+    "start:next": "next start",
     "lint": "eslint .",
+    "postinstall": "prisma generate",
     "test": "vitest run",
     "test:watch": "vitest",
     "prisma:generate": "prisma generate",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:migrate": "prisma migrate dev"
   },
   "dependencies": {
