@@ -3,7 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { AuthPanel } from "@/components/auth-panel";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const nextPath = (await searchParams).next ?? "/unlock";
+  const nextPath = (await searchParams).next ?? "/dashboard";
 
   return (
     <main className="min-h-screen px-4 py-10 md:grid md:place-items-center">

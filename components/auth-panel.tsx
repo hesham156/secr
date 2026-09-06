@@ -15,7 +15,7 @@ type AuthPanelProps = {
   nextPath?: string;
 };
 
-export function AuthPanel({ title, description, icon, mode, nextPath = "/unlock" }: AuthPanelProps) {
+export function AuthPanel({ title, description, icon, mode, nextPath = "/dashboard" }: AuthPanelProps) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
