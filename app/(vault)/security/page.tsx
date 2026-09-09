@@ -1,9 +1,12 @@
+"use client";
+
 import { AlertTriangle, CheckCircle2, Repeat, Timer } from "lucide-react";
-import { demoVaultItems } from "@/lib/vault/demo-data";
+import { useVault } from "@/components/vault/vault-provider";
 import { calculateSecurityReport } from "@/lib/security/password-health";
 
 export default function SecurityPage() {
-  const report = calculateSecurityReport(demoVaultItems);
+  const { items } = useVault();
+  const report = calculateSecurityReport(items);
 
   return (
     <div className="space-y-6">

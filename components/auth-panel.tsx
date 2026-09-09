@@ -12,10 +12,9 @@ type AuthPanelProps = {
   description: string;
   icon: ReactNode;
   mode: "login" | "register";
-  nextPath?: string;
 };
 
-export function AuthPanel({ title, description, icon, mode, nextPath = "/dashboard" }: AuthPanelProps) {
+export function AuthPanel({ title, description, icon, mode }: AuthPanelProps) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -49,6 +48,18 @@ export function AuthPanel({ title, description, icon, mode, nextPath = "/dashboa
           return;
         }
 
+        const signInAfterRegister = await signIn("credentials", {
+          email: parsed.data.email,
+          password: parsed.data.password,
+          redirect: false
+        });
+
+        if (signInAfterRegister?.error) {
+          toast.error("Account created, but automatic sign-in failed. Please sign in.");
+          router.push("/login");
+          return;
+        }
+
         toast.success("Account created. Set up your master password next.");
         router.push("/setup-master-password");
         router.refresh();
@@ -68,7 +79,7 @@ export function AuthPanel({ title, description, icon, mode, nextPath = "/dashboa
       }
 
       toast.success("Signed in. Unlock your vault with your master password.");
-      router.push(nextPath);
+      router.push("/unlock");
       router.refresh();
     } catch {
       toast.error("Something went wrong.");

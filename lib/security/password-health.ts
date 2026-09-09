@@ -1,12 +1,21 @@
-import type { DemoVaultItem } from "@/lib/vault/demo-data";
+// Minimal structural shape the health checks need. Both the demo data and the
+// decrypted VaultItemView satisfy it, so the analysis works for either.
+export type HealthCheckItem = {
+  id: string;
+  password: string;
+  website: string;
+  username: string;
+  url: string;
+  updatedAt: string;
+};
 
-export type SecurityReport = {
+export type SecurityReport<T extends HealthCheckItem = HealthCheckItem> = {
   score: number;
-  weak: DemoVaultItem[];
-  reused: DemoVaultItem[];
-  old: DemoVaultItem[];
-  missingUrls: DemoVaultItem[];
-  duplicateAccounts: DemoVaultItem[];
+  weak: T[];
+  reused: T[];
+  old: T[];
+  missingUrls: T[];
+  duplicateAccounts: T[];
   recommendations: string[];
 };
 
@@ -29,7 +38,7 @@ export function passwordStrengthLabel(password: string): "Weak" | "Fair" | "Good
   return "Strong";
 }
 
-export function calculateSecurityReport(items: DemoVaultItem[], twoFactorEnabled = false): SecurityReport {
+export function calculateSecurityReport<T extends HealthCheckItem>(items: T[], twoFactorEnabled = false): SecurityReport<T> {
   const weak = items.filter((item) => estimatePasswordScore(item.password) < 50 || item.password.length < 12);
   const passwordCounts = new Map<string, number>();
   const accountCounts = new Map<string, number>();

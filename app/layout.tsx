@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
+import { VaultProvider } from "@/components/vault/vault-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        {children}
+        <VaultProvider>{children}</VaultProvider>
         <Toaster richColors position="top-right" />
       </body>
     </html>
